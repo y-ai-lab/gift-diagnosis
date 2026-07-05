@@ -30,7 +30,14 @@
         </div>
 
         <form id="quiz-form" class="quiz-form">
-          <fieldset class="question">
+          <div class="quiz-progress" aria-live="polite">
+            <span id="progress-text">1 / 5</span>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+          </div>
+
+          <fieldset class="question" data-question="0">
             <legend>Q1. 誰へのプレゼントですか？</legend>
             <div class="option-grid">
               <label><input type="radio" name="recipient" value="恋人" required />恋人</label>
@@ -41,7 +48,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="question">
+          <fieldset class="question" data-question="1">
             <legend>Q2. 目的は？</legend>
             <div class="option-grid">
               <label><input type="radio" name="purpose" value="誕生日" required />誕生日</label>
@@ -52,7 +59,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="question">
+          <fieldset class="question" data-question="2">
             <legend>Q3. 予算は？</legend>
             <div class="option-grid">
               <label><input type="radio" name="budget" value="1,000〜3,000円" required />1,000〜3,000円</label>
@@ -62,7 +69,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="question">
+          <fieldset class="question" data-question="3">
             <legend>Q4. 相手の雰囲気は？</legend>
             <div class="option-grid">
               <label><input type="radio" name="vibe" value="実用的なものが好き" required />実用的なものが好き</label>
@@ -73,7 +80,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="question">
+          <fieldset class="question" data-question="4">
             <legend>Q5. 避けたいものは？</legend>
             <div class="option-grid">
               <label><input type="radio" name="avoid" value="食べ物" required />食べ物</label>
@@ -84,9 +91,11 @@
             </div>
           </fieldset>
 
+          <p class="form-error" id="form-error" role="alert"></p>
           <div class="form-actions">
-            <button class="secondary-button" type="button" id="back-to-top-button">戻る</button>
-            <button class="primary-button" type="submit">結果を見る</button>
+            <button class="secondary-button" type="button" id="prev-button">戻る</button>
+            <button class="primary-button" type="button" id="next-button">次へ</button>
+            <button class="primary-button" type="submit" id="submit-button">診断結果を見る</button>
           </div>
         </form>
       </section>
@@ -96,6 +105,11 @@
           <p class="eyebrow">Result</p>
           <h2 id="result-title">診断結果</h2>
           <p id="result-summary"></p>
+        </div>
+
+        <div class="result-block">
+          <h3>今回の条件</h3>
+          <dl class="condition-list" id="condition-list"></dl>
         </div>
 
         <div class="result-block">
