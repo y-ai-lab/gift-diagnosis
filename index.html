@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>プレゼント選び診断</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="screen screen-active" id="top-screen" aria-labelledby="top-title">
+        <div class="hero">
+          <p class="eyebrow">Gift Direction Finder</p>
+          <h1 id="top-title">プレゼント選び診断</h1>
+          <p class="lead">
+            相手・予算・目的に答えるだけで、外しにくいプレゼントの方向性がわかります。
+          </p>
+          <button class="primary-button" type="button" id="start-button">診断をはじめる</button>
+          <p class="note">
+            商品を直接おすすめするのではなく、まずはプレゼントのジャンルを整理する診断です。
+          </p>
+        </div>
+      </section>
+
+      <section class="screen" id="quiz-screen" aria-labelledby="quiz-title">
+        <div class="screen-header">
+          <p class="eyebrow">5 questions</p>
+          <h2 id="quiz-title">診断入力</h2>
+          <p>分かる範囲で選んでください。迷ったら一番近いものを選べば大丈夫です。</p>
+        </div>
+
+        <form id="quiz-form" class="quiz-form">
+          <fieldset class="question">
+            <legend>Q1. 誰へのプレゼントですか？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="recipient" value="恋人" required />恋人</label>
+              <label><input type="radio" name="recipient" value="友人" />友人</label>
+              <label><input type="radio" name="recipient" value="家族" />家族</label>
+              <label><input type="radio" name="recipient" value="職場の人" />職場の人</label>
+              <label><input type="radio" name="recipient" value="その他" />その他</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question">
+            <legend>Q2. 目的は？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="purpose" value="誕生日" required />誕生日</label>
+              <label><input type="radio" name="purpose" value="お礼" />お礼</label>
+              <label><input type="radio" name="purpose" value="記念日" />記念日</label>
+              <label><input type="radio" name="purpose" value="ちょっとした贈り物" />ちょっとした贈り物</label>
+              <label><input type="radio" name="purpose" value="季節イベント" />季節イベント</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question">
+            <legend>Q3. 予算は？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="budget" value="1,000〜3,000円" required />1,000〜3,000円</label>
+              <label><input type="radio" name="budget" value="3,000〜5,000円" />3,000〜5,000円</label>
+              <label><input type="radio" name="budget" value="5,000〜10,000円" />5,000〜10,000円</label>
+              <label><input type="radio" name="budget" value="10,000円以上" />10,000円以上</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question">
+            <legend>Q4. 相手の雰囲気は？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="vibe" value="実用的なものが好き" required />実用的なものが好き</label>
+              <label><input type="radio" name="vibe" value="おしゃれなものが好き" />おしゃれなものが好き</label>
+              <label><input type="radio" name="vibe" value="食べ物や飲み物が好き" />食べ物や飲み物が好き</label>
+              <label><input type="radio" name="vibe" value="癒し系が好き" />癒し系が好き</label>
+              <label><input type="radio" name="vibe" value="よく分からない" />よく分からない</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question">
+            <legend>Q5. 避けたいものは？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="avoid" value="食べ物" required />食べ物</label>
+              <label><input type="radio" name="avoid" value="香りもの" />香りもの</label>
+              <label><input type="radio" name="avoid" value="高すぎるもの" />高すぎるもの</label>
+              <label><input type="radio" name="avoid" value="形に残るもの" />形に残るもの</label>
+              <label><input type="radio" name="avoid" value="特になし" />特になし</label>
+            </div>
+          </fieldset>
+
+          <div class="form-actions">
+            <button class="secondary-button" type="button" id="back-to-top-button">戻る</button>
+            <button class="primary-button" type="submit">結果を見る</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="screen" id="result-screen" aria-labelledby="result-title">
+        <div class="screen-header">
+          <p class="eyebrow">Result</p>
+          <h2 id="result-title">診断結果</h2>
+          <p id="result-summary"></p>
+        </div>
+
+        <div class="result-block">
+          <h3>おすすめジャンル</h3>
+          <div class="genre-list" id="genre-list"></div>
+        </div>
+
+        <div class="result-block">
+          <h3>選んだ理由</h3>
+          <p id="reason-text"></p>
+        </div>
+
+        <div class="result-block">
+          <h3>検索キーワード</h3>
+          <div class="keyword-list" id="keyword-list"></div>
+        </div>
+
+        <div class="next-step">
+          <h3>次にやること</h3>
+          <p id="next-step-text"></p>
+        </div>
+
+        <div class="form-actions">
+          <button class="secondary-button" type="button" id="retry-button">もう一度診断する</button>
+          <button class="primary-button" type="button" id="edit-button">回答を見直す</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
