@@ -134,9 +134,39 @@ h3 {
   gap: 16px;
 }
 
+.quiz-progress {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9e1d7;
+}
+
+.progress-bar {
+  width: 20%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
 .question {
+  display: none;
   margin: 0;
   padding: 20px;
+}
+
+.question.question-active {
+  display: block;
 }
 
 legend {
@@ -192,6 +222,13 @@ input[type="radio"] {
   margin-top: 6px;
 }
 
+.form-error {
+  min-height: 1.7em;
+  margin: 0;
+  color: var(--rose);
+  font-weight: 800;
+}
+
 .primary-button,
 .secondary-button {
   min-height: 48px;
@@ -221,6 +258,23 @@ input[type="radio"] {
 .next-step {
   margin-bottom: 16px;
   padding: 20px;
+}
+
+.condition-list {
+  display: grid;
+  grid-template-columns: minmax(112px, 0.35fr) 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.condition-list dt {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.condition-list dd {
+  margin: 0;
+  font-weight: 700;
 }
 
 .genre-list,
@@ -283,6 +337,14 @@ input[type="radio"] {
 
   .form-actions {
     flex-direction: column-reverse;
+  }
+
+  .condition-list {
+    grid-template-columns: 1fr;
+  }
+
+  .condition-list dt {
+    margin-top: 4px;
   }
 
   .primary-button,
