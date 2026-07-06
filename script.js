@@ -31,36 +31,43 @@ const answerLabels = {
 
 const genreProfiles = {
   practical: {
+    icon: "🧺",
     title: "毎日使える実用品",
     keyword: "実用",
     description: "タオル、ケーブル周りの小物、使い切りやすい日用品など、相手の生活に自然になじむもの。",
   },
   stylish: {
+    icon: "✨",
     title: "おしゃれな消耗品・小物",
     keyword: "おしゃれ",
     description: "見た目が整ったパッケージの消耗品や、相手の雰囲気に合わせやすい軽めのアイテム。",
   },
   food: {
+    icon: "☕",
     title: "食べ物・飲み物ギフト",
     keyword: "消えもの",
     description: "焼き菓子、コーヒー、お茶など、受け取ったあとに残りすぎない定番のギフト。",
   },
   relax: {
+    icon: "🛁",
     title: "リラックス・ケア用品",
     keyword: "癒し",
     description: "休む時間を作れるケア用品や、肌ざわりのよいタオルなど、疲れをいたわる方向のギフト。",
   },
   experience: {
+    icon: "🎟️",
     title: "体験・チケット系",
     keyword: "体験",
     description: "映画券、体験チケット、選べるサービス券など、相手が使うタイミングを選べるもの。",
   },
   premium: {
+    icon: "🎀",
     title: "少し上質な定番品",
     keyword: "上質",
     description: "予算内で見た目と質感が整いやすい、特別感のある定番ギフト。",
   },
   safe: {
+    icon: "💌",
     title: "相手が選べるギフト",
     keyword: "選べる",
     description: "ギフトカードやカタログ系など、好みが分からないときでも外しにくいもの。",
@@ -337,7 +344,13 @@ function renderResult(result, answers) {
   result.genres.forEach((genre, index) => {
     const card = document.createElement("div");
     card.className = "genre-card";
-    card.innerHTML = `<strong>${index + 1}. ${genre.title}</strong><span>${genre.description}</span>`;
+    card.innerHTML = `
+      <div class="genre-rank">${index + 1}</div>
+      <div>
+        <strong><span class="genre-icon" aria-hidden="true">${genre.icon}</span>${genre.title}</strong>
+        <span>${genre.description}</span>
+      </div>
+    `;
     genreList.appendChild(card);
   });
 
