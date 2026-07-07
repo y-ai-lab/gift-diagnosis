@@ -297,6 +297,7 @@ function diagnose(answers) {
 
   const direction = buildDirection(answers, topGenres);
   const searchKeywords = buildKeywords(answers, topGenres);
+  const searchTips = buildSearchTips(topGenres[0]);
 
   return {
     direction,
@@ -308,14 +309,50 @@ function diagnose(answers) {
     primaryKeyword: searchKeywords[0],
     phrase: buildGiftPhrase(answers),
     firstCandidateSupport: buildFirstCandidateSupport(topGenres[0]),
-    searchGuidance:
-      "検索したら、上から全部見なくてOKです。見るポイントは、レビュー数・到着日・個包装かどうか・渡しやすい見た目の4つです。",
+    searchGuidance: searchTips.guidance,
     nextSteps: [
       "まず検索ワードをコピーする",
       "Amazon・楽天・Yahooのどれかで検索する",
-      "評価が高い商品を3つだけ開き、レビュー数・到着日・個包装・見た目で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      searchTips.nextStep,
     ],
   };
+}
+
+function buildSearchTips(firstGenre) {
+  const tips = {
+    food: {
+      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、個包装・賞味期限・レビュー数・到着日の4つです。",
+      nextStep: "評価が高い商品を3つだけ開き、個包装・賞味期限・レビュー数・到着日で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+    },
+    practical: {
+      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、サイズ感・色の無難さ・箱入りかどうか・レビュー数の4つです。",
+      nextStep:
+        "評価が高い商品を3つだけ開き、サイズ感・色の無難さ・箱入りかどうか・レビュー数で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+    },
+    relax: {
+      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、香りの強さ・肌に合いやすいか・パッケージ・レビュー数の4つです。",
+      nextStep:
+        "評価が高い商品を3つだけ開き、香りの強さ・肌に合いやすいか・パッケージ・レビュー数で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+    },
+    experience: {
+      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、有効期限・使えるエリア・予約のしやすさ・相手が行きやすいかの4つです。",
+      nextStep:
+        "候補を3つだけ開き、有効期限・使えるエリア・予約のしやすさ・相手が行きやすいかで比べる。迷ったら、第一候補に近いものを選べばOKです。",
+    },
+    stylish: {
+      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、渡しやすい見た目・レビュー数・到着日・相手に気を遣わせない価格感の4つです。",
+      nextStep:
+        "評価が高い商品を3つだけ開き、渡しやすい見た目・レビュー数・到着日・相手に気を遣わせない価格感で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+    },
+  };
+
+  return (
+    tips[firstGenre.key] || {
+      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、レビュー数・到着日・渡しやすい見た目・相手に気を遣わせない価格感の4つです。",
+      nextStep:
+        "評価が高い商品を3つだけ開き、レビュー数・到着日・見た目・相手に気を遣わせない価格感で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+    }
+  );
 }
 
 function buildFirstCandidateSupport(firstGenre) {
