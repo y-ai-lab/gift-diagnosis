@@ -14,12 +14,22 @@ const nextButton = document.querySelector("#next-button");
 const submitButton = document.querySelector("#submit-button");
 const resultSummary = document.querySelector("#result-summary");
 const conditionList = document.querySelector("#condition-list");
-const genreList = document.querySelector("#genre-list");
+const directionText = document.querySelector("#direction-text");
+const candidateList = document.querySelector("#candidate-list");
+const avoidList = document.querySelector("#avoid-list");
+const safeChoiceText = document.querySelector("#safe-choice-text");
 const reasonText = document.querySelector("#reason-text");
+const primaryKeyword = document.querySelector("#primary-keyword");
+const copyKeywordButton = document.querySelector("#copy-keyword-button");
+const copyStatus = document.querySelector("#copy-status");
 const keywordList = document.querySelector("#keyword-list");
-const nextStepText = document.querySelector("#next-step-text");
+const shopLinks = document.querySelector("#shop-links");
+const giftPhrase = document.querySelector("#gift-phrase");
+const nextStepList = document.querySelector("#next-step-list");
 
 let currentQuestion = 0;
+let currentSearchKeyword = "";
+let copyStatusTimer = null;
 
 const answerLabels = {
   recipient: "誰へのプレゼントか",
@@ -32,45 +42,52 @@ const answerLabels = {
 const genreProfiles = {
   practical: {
     icon: "🧺",
-    title: "毎日使える実用品",
-    keyword: "実用",
-    description: "タオル、ケーブル周りの小物、使い切りやすい日用品など、相手の生活に自然になじむもの。",
+    title: "実用的な消耗品ギフト",
+    candidate: "上質なタオル・日用品ギフト",
+    keyword: "実用的 ギフト タオル 消耗品",
+    description: "使い道が分かりやすく、好みが大きく外れにくい方向性です。",
   },
   stylish: {
     icon: "✨",
-    title: "おしゃれな消耗品・小物",
-    keyword: "おしゃれ",
-    description: "見た目が整ったパッケージの消耗品や、相手の雰囲気に合わせやすい軽めのアイテム。",
+    title: "見た目が整ったおしゃれギフト",
+    candidate: "パッケージのきれいな消えものギフト",
+    keyword: "おしゃれ ギフト 消えもの",
+    description: "写真映えや渡した時の印象を作りやすい方向性です。",
   },
   food: {
     icon: "☕",
-    title: "食べ物・飲み物ギフト",
-    keyword: "消えもの",
-    description: "焼き菓子、コーヒー、お茶など、受け取ったあとに残りすぎない定番のギフト。",
+    title: "個包装のお菓子・ドリンクギフト",
+    candidate: "個包装のお菓子ギフト",
+    keyword: "お菓子 ギフト 個包装",
+    description: "食べ切りやすく、相手に気を遣わせにくい定番です。",
   },
   relax: {
     icon: "🛁",
     title: "リラックス・ケア用品",
-    keyword: "癒し",
-    description: "休む時間を作れるケア用品や、肌ざわりのよいタオルなど、疲れをいたわる方向のギフト。",
+    candidate: "入浴剤・ケア用品ギフト",
+    keyword: "癒し ギフト ケア用品",
+    description: "疲れをいたわる気持ちが伝わりやすい方向性です。",
   },
   experience: {
     icon: "🎟️",
-    title: "体験・チケット系",
-    keyword: "体験",
-    description: "映画券、体験チケット、選べるサービス券など、相手が使うタイミングを選べるもの。",
+    title: "体験・チケット系ギフト",
+    candidate: "選べる体験ギフト",
+    keyword: "体験ギフト チケット",
+    description: "物を増やさず、印象に残しやすい方向性です。",
   },
   premium: {
     icon: "🎀",
-    title: "少し上質な定番品",
-    keyword: "上質",
-    description: "予算内で見た目と質感が整いやすい、特別感のある定番ギフト。",
+    title: "少し上質な定番ギフト",
+    candidate: "上質な定番ギフト",
+    keyword: "上質 ギフト 定番",
+    description: "予算を活かして、特別感を出しやすい方向性です。",
   },
   safe: {
     icon: "💌",
     title: "相手が選べるギフト",
-    keyword: "選べる",
-    description: "ギフトカードやカタログ系など、好みが分からないときでも外しにくいもの。",
+    candidate: "カタログ・選べるギフト",
+    keyword: "選べる ギフト カタログ",
+    description: "好みが分からない時に、外しにくさを優先できます。",
   },
 };
 
@@ -153,7 +170,8 @@ function diagnose(answers) {
   if (answers.vibe === "癒し系が好き") addScore(scores, "relax", 5);
   if (answers.vibe === "よく分からない") {
     addScore(scores, "safe", 5);
-    addScore(scores, "experience", 2);
+    addScore(scores, "food", 2);
+    addScore(scores, "practical", 2);
   }
 
   if (answers.purpose === "記念日") {
@@ -183,7 +201,12 @@ function diagnose(answers) {
   if (answers.recipient === "職場の人") {
     addScore(scores, "safe", 4);
     addScore(scores, "food", 3);
-    addScore(scores, "experience", 1);
+    addScore(scores, "practical", 2);
+  }
+
+  if (answers.recipient === "職場の人" && answers.purpose === "お礼") {
+    addScore(scores, "food", 4);
+    addScore(scores, "practical", 1);
   }
 
   if (answers.recipient === "恋人") {
@@ -231,67 +254,139 @@ function diagnose(answers) {
     .filter(([key]) => !excludedGenres.has(key))
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
-    .map(([key]) => genreProfiles[key]);
+    .map(([key]) => ({ key, ...genreProfiles[key] }));
+
+  const direction = buildDirection(answers, topGenres);
+  const searchKeywords = buildKeywords(answers, topGenres);
 
   return {
+    direction,
     genres: topGenres,
-    keywords: buildKeywords(answers, topGenres),
-    reason: buildReason(answers),
-    nextStep:
-      "この中から商品候補を3つだけ探して、価格・雰囲気・渡しやすさで比べてみましょう。",
+    avoidItems: buildAvoidItems(answers),
+    safeChoice: buildSafeChoice(answers, topGenres),
+    reason: buildReason(answers, topGenres),
+    keywords: searchKeywords,
+    primaryKeyword: searchKeywords[0],
+    phrase: buildGiftPhrase(answers),
+    nextSteps: [
+      "まず検索ワードをコピーする",
+      "Amazon・楽天・Yahooのどれかで検索する",
+      "迷ったら「第一候補」に近い商品を3つだけ見比べる",
+    ],
   };
 }
 
-function buildReason(answers) {
-  const reasons = [];
-
-  if (answers.recipient === "職場の人" && answers.purpose === "お礼") {
-    reasons.push(
-      "職場の人へのお礼なので、好みが出すぎるものより、消耗品で受け取りやすいジャンルを優先しました。"
-    );
-  } else if (answers.recipient === "恋人" && answers.purpose === "記念日") {
-    reasons.push(
-      "恋人への記念日なので、普段使いだけでなく、少し特別感が伝わるジャンルを優先しました。"
-    );
-  } else if (answers.purpose === "ちょっとした贈り物") {
-    reasons.push(
-      "ちょっとした贈り物なので、相手が重く感じにくく、気軽に受け取りやすい方向に寄せています。"
-    );
-  } else {
-    reasons.push(
-      `${answers.recipient}への${answers.purpose}なので、相手との距離感に合いやすいジャンルを優先しました。`
-    );
-  }
-
-  if (answers.avoid === "食べ物") {
-    reasons.push("食べ物を避けたい条件があるため、お菓子、食品、コーヒー、お茶系は外しています。");
-  }
-
-  if (answers.avoid === "香りもの") {
-    reasons.push("香りものを避けたい条件があるため、入浴剤、香水、ハンドクリーム系は外しています。");
+function buildDirection(answers, genres) {
+  if (answers.recipient === "職場の人" || answers.purpose === "お礼" || answers.purpose === "ちょっとした贈り物") {
+    return "気を遣わせない消えもの・無難ギフトタイプ";
   }
 
   if (answers.avoid === "形に残るもの") {
-    reasons.push("形に残るものを避けたい条件があるため、雑貨、マグカップ、文房具系は外しています。");
+    return "手元に残りにくい消えものギフトタイプ";
+  }
+
+  if (answers.recipient === "恋人" || answers.purpose === "記念日") {
+    return "特別感を出しつつ好みを外しにくいギフトタイプ";
+  }
+
+  if (answers.vibe === "実用的なものが好き" || answers.recipient === "家族") {
+    return "暮らしで使いやすい実用ギフトタイプ";
+  }
+
+  if (answers.vibe === "よく分からない") {
+    return "相手に選ぶ余地を残す安全ギフトタイプ";
+  }
+
+  return `${genres[0].title}を軸にした外しにくいギフトタイプ`;
+}
+
+function buildAvoidItems(answers) {
+  const base = [];
+
+  if (answers.avoid === "食べ物") {
+    base.push("お菓子・食品・コーヒー・お茶など食べ物や飲み物系");
+  }
+
+  if (answers.avoid === "香りもの") {
+    base.push("香りが強いもの、入浴剤、香水、ハンドクリーム系");
   }
 
   if (answers.avoid === "高すぎるもの") {
-    reasons.push("高すぎる印象を避けたい条件があるため、価格よりも見た目と渡しやすさのバランスを重視しています。");
+    base.push("相手が気を遣うほど高額に見えるもの");
+  }
+
+  if (answers.avoid === "形に残るもの") {
+    base.push("雑貨、マグカップ、文房具など長く残るもの");
   }
 
   if (answers.avoid === "特になし") {
-    reasons.push("避けたいものが特にないため、相手の雰囲気と予算に合わせて幅広く候補を残しています。");
+    base.push("サイズが関係するもの");
+    base.push("好みが強く出るデザインのもの");
   }
 
-  if (answers.budget === "3,000〜5,000円") {
-    reasons.push("3,000〜5,000円の予算でも見た目が整いやすいジャンルを選んでいます。");
-  } else if (answers.budget === "1,000〜3,000円") {
-    reasons.push("1,000〜3,000円の予算なので、小さくても気持ちが伝わりやすいものを中心にしています。");
-  } else if (answers.budget === "10,000円以上") {
-    reasons.push("10,000円以上の予算なので、安さよりも特別感や体験価値が出やすい方向を残しています。");
+  if (answers.recipient === "職場の人") {
+    base.push("個人的すぎるもの");
   }
+
+  return [...new Set(base)];
+}
+
+function buildSafeChoice(answers, genres) {
+  if (answers.avoid === "食べ物") {
+    return "迷ったら、タオルや消耗品など使い道が分かりやすいものを選ぶのが安全です。食品を外しても、見た目の整った実用品なら受け取りやすくなります。";
+  }
+
+  if (answers.avoid === "香りもの") {
+    return "迷ったら、香りが残らない個包装のお菓子やドリンク系を選ぶのが安全です。香りの好みに左右されにくく、渡しやすさも保てます。";
+  }
+
+  if (answers.avoid === "形に残るもの") {
+    return "迷ったら、食べ切れるお菓子やドリンク、体験チケットなど手元に残りにくいものを選ぶのが安全です。置き場所や好みの負担を減らせます。";
+  }
+
+  if (answers.recipient === "職場の人") {
+    return "迷ったら、個包装で分けやすいお菓子やドリンク系を選ぶのが安全です。相手に気を遣わせにくく、職場でも受け取りやすいです。";
+  }
+
+  return `迷ったら、第一候補の「${genres[0].candidate}」に近い商品から選ぶのが安全です。価格、見た目、渡しやすさの3点で比べると候補を絞りやすくなります。`;
+}
+
+function buildReason(answers, genres) {
+  const reasons = [];
+
+  if (answers.recipient === "職場の人" && answers.purpose === "お礼") {
+    reasons.push("職場の人へのお礼なので、好みが出すぎるものより、受け取りやすく気を遣わせにくい方向性を優先しました。");
+  } else {
+    reasons.push(`${answers.recipient}への${answers.purpose}なので、相手との関係性と予算に合いやすい方向性を優先しました。`);
+  }
+
+  if (answers.avoid !== "特になし") {
+    reasons.push(`避けたいものが「${answers.avoid}」なので、結果から該当しやすいジャンルを外しています。`);
+  }
+
+  reasons.push(`${answers.budget}の予算でも探しやすく、検索で候補を絞りやすい「${genres[0].candidate}」を第一候補にしています。`);
 
   return reasons.join("");
+}
+
+function buildGiftPhrase(answers) {
+  if (answers.purpose === "お礼") {
+    return "いつもありがとう。気軽に使ってもらえたら嬉しいです。";
+  }
+
+  if (answers.purpose === "誕生日") {
+    return "誕生日おめでとう。好みに合いそうなものを選んでみました。";
+  }
+
+  if (answers.purpose === "記念日") {
+    return "いつもありがとう。記念に、少し特別感のあるものを選びました。";
+  }
+
+  if (answers.purpose === "ちょっとした贈り物") {
+    return "ほんの気持ちです。気軽に受け取ってもらえたら嬉しいです。";
+  }
+
+  return "季節のごあいさつに、気軽に楽しめそうなものを選びました。";
 }
 
 function budgetKeyword(budget) {
@@ -303,22 +398,44 @@ function budgetKeyword(budget) {
 
 function recipientKeyword(recipient) {
   if (recipient === "職場の人") return "職場";
+  if (recipient === "その他") return "相手";
   return recipient;
 }
 
 function purposeKeyword(purpose) {
-  return purpose === "ちょっとした贈り物" ? "プチギフト" : purpose;
+  if (purpose === "ちょっとした贈り物") return "プチギフト";
+  if (purpose === "季節イベント") return "季節 ギフト";
+  return purpose;
+}
+
+function moodKeyword(answers) {
+  if (answers.recipient === "職場の人" || answers.vibe === "よく分からない") return "無難";
+  if (answers.vibe === "おしゃれなものが好き") return "おしゃれ";
+  if (answers.vibe === "実用的なものが好き") return "実用的";
+  if (answers.vibe === "癒し系が好き") return "癒し";
+  return "外さない";
+}
+
+function safetyKeyword(answers) {
+  if (answers.avoid === "香りもの") return "香りなし";
+  if (answers.avoid === "食べ物") return "食品以外";
+  if (answers.avoid === "形に残るもの") return "消えもの";
+  if (answers.avoid === "高すぎるもの") return "気軽";
+  return "";
 }
 
 function buildKeywords(answers, genres) {
   return genres.map((genre) =>
     [
+      budgetKeyword(answers.budget),
       recipientKeyword(answers.recipient),
       purposeKeyword(answers.purpose),
-      "プレゼント",
-      budgetKeyword(answers.budget),
+      moodKeyword(answers),
       genre.keyword,
-    ].join(" ")
+      safetyKeyword(answers),
+    ]
+      .filter(Boolean)
+      .join(" ")
   );
 }
 
@@ -334,33 +451,121 @@ function renderConditions(answers) {
   });
 }
 
-function renderResult(result, answers) {
-  resultSummary.textContent = `${answers.recipient}への${answers.purpose}に合いそうな方向性です。`;
-  reasonText.textContent = result.reason;
-  nextStepText.textContent = result.nextStep;
-  renderConditions(answers);
+function renderCandidates(genres) {
+  candidateList.innerHTML = "";
 
-  genreList.innerHTML = "";
-  result.genres.forEach((genre, index) => {
+  genres.slice(0, 2).forEach((genre, index) => {
     const card = document.createElement("div");
-    card.className = "genre-card";
+    card.className = "candidate-card";
     card.innerHTML = `
-      <div class="genre-rank">${index + 1}</div>
+      <div class="candidate-rank">${index === 0 ? "第一候補" : "第二候補"}</div>
       <div>
-        <strong><span class="genre-icon" aria-hidden="true">${genre.icon}</span>${genre.title}</strong>
-        <span>${genre.description}</span>
+        <strong><span aria-hidden="true">${genre.icon}</span>${genre.candidate}</strong>
+        <p>${genre.description}</p>
       </div>
     `;
-    genreList.appendChild(card);
+    candidateList.appendChild(card);
   });
+}
 
+function renderAvoidItems(items) {
+  avoidList.innerHTML = "";
+
+  items.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    avoidList.appendChild(li);
+  });
+}
+
+function renderKeywords(keywords) {
   keywordList.innerHTML = "";
-  result.keywords.forEach((keyword) => {
+
+  keywords.forEach((keyword) => {
     const chip = document.createElement("div");
     chip.className = "keyword-chip";
     chip.textContent = keyword;
     keywordList.appendChild(chip);
   });
+}
+
+function renderShopLinks(keyword) {
+  const encodedKeyword = encodeURIComponent(keyword);
+  const links = [
+    ["Amazonで探す", `https://www.amazon.co.jp/s?k=${encodedKeyword}`],
+    ["楽天で探す", `https://search.rakuten.co.jp/search/mall/${encodedKeyword}/`],
+    ["Yahooショッピングで探す", `https://shopping.yahoo.co.jp/search?p=${encodedKeyword}`],
+  ];
+
+  shopLinks.innerHTML = "";
+  links.forEach(([label, url]) => {
+    const link = document.createElement("a");
+    link.className = "shop-link";
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = label;
+    shopLinks.appendChild(link);
+  });
+}
+
+function renderNextSteps(steps) {
+  nextStepList.innerHTML = "";
+
+  steps.forEach((step) => {
+    const li = document.createElement("li");
+    li.textContent = step;
+    nextStepList.appendChild(li);
+  });
+}
+
+function renderResult(result, answers) {
+  currentSearchKeyword = result.primaryKeyword;
+
+  resultSummary.textContent = `${answers.recipient}への${answers.purpose}で迷いにくい候補を整理しました。`;
+  directionText.textContent = result.direction;
+  safeChoiceText.textContent = result.safeChoice;
+  reasonText.textContent = result.reason;
+  primaryKeyword.textContent = result.primaryKeyword;
+  giftPhrase.textContent = result.phrase;
+  copyStatus.textContent = "";
+
+  renderConditions(answers);
+  renderCandidates(result.genres);
+  renderAvoidItems(result.avoidItems);
+  renderKeywords(result.keywords);
+  renderShopLinks(result.primaryKeyword);
+  renderNextSteps(result.nextSteps);
+}
+
+async function copySearchKeyword() {
+  copyStatus.textContent = "";
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(currentSearchKeyword);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = currentSearchKeyword;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand("copy");
+      textarea.remove();
+      if (!copied) throw new Error("copy command failed");
+    }
+
+    copyStatus.textContent = "コピーしました";
+  } catch (error) {
+    copyStatus.textContent = "コピーできませんでした。手動でコピーしてください";
+  }
+
+  clearTimeout(copyStatusTimer);
+  copyStatusTimer = setTimeout(() => {
+    copyStatus.textContent = "";
+  }, 3000);
 }
 
 document.querySelector("#start-button").addEventListener("click", () => {
@@ -391,6 +596,8 @@ questions.forEach((question) => {
     formError.textContent = "";
   });
 });
+
+copyKeywordButton.addEventListener("click", copySearchKeyword);
 
 document.querySelector("#retry-button").addEventListener("click", () => {
   quizForm.reset();
