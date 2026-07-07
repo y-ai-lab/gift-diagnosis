@@ -565,9 +565,7 @@ async function copySearchKeyword() {
   copyStatus.textContent = "";
 
   try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(currentSearchKeyword);
-    } else {
+    const fallbackCopy = () => {
       const textarea = document.createElement("textarea");
       textarea.value = currentSearchKeyword;
       textarea.setAttribute("readonly", "");
@@ -578,6 +576,16 @@ async function copySearchKeyword() {
       const copied = document.execCommand("copy");
       textarea.remove();
       if (!copied) throw new Error("copy command failed");
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(currentSearchKeyword);
+      } catch (error) {
+        fallbackCopy();
+      }
+    } else {
+      fallbackCopy();
     }
 
     copyStatus.textContent = "コピーしました";
