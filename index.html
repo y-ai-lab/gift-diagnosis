@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>プレゼント選び診断</title>
-    <link rel="stylesheet" href="styles.css?v=20260707-4" />
+    <link rel="stylesheet" href="styles.css?v=20260707-5" />
   </head>
   <body>
     <main class="app-shell">
@@ -53,7 +53,17 @@
           </fieldset>
 
           <fieldset class="question" data-question="1">
-            <legend>Q2. 目的は？</legend>
+            <legend>Q2. 相手との距離感は？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="distance" value="かなり親しい" required />かなり親しい</label>
+              <label><input type="radio" name="distance" value="そこそこ親しい" />そこそこ親しい</label>
+              <label><input type="radio" name="distance" value="気を遣う関係" />気を遣う関係</label>
+              <label><input type="radio" name="distance" value="よく分からない" />よく分からない</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question" data-question="2">
+            <legend>Q3. 目的は？</legend>
             <div class="option-grid">
               <label><input type="radio" name="purpose" value="誕生日" required />誕生日</label>
               <label><input type="radio" name="purpose" value="お礼" />お礼</label>
@@ -63,8 +73,8 @@
             </div>
           </fieldset>
 
-          <fieldset class="question" data-question="2">
-            <legend>Q3. 予算は？</legend>
+          <fieldset class="question" data-question="3">
+            <legend>Q4. 予算は？</legend>
             <div class="option-grid">
               <label><input type="radio" name="budget" value="1,000〜3,000円" required />1,000〜3,000円</label>
               <label><input type="radio" name="budget" value="3,000〜5,000円" />3,000〜5,000円</label>
@@ -73,24 +83,14 @@
             </div>
           </fieldset>
 
-          <fieldset class="question" data-question="3">
-            <legend>Q4. 相手の雰囲気は？</legend>
+          <fieldset class="question" data-question="4">
+            <legend>Q5. 相手の雰囲気は？</legend>
             <div class="option-grid">
               <label><input type="radio" name="vibe" value="実用的なものが好き" required />実用的なものが好き</label>
               <label><input type="radio" name="vibe" value="おしゃれなものが好き" />おしゃれなものが好き</label>
               <label><input type="radio" name="vibe" value="食べ物や飲み物が好き" />食べ物や飲み物が好き</label>
               <label><input type="radio" name="vibe" value="癒し系が好き" />癒し系が好き</label>
               <label><input type="radio" name="vibe" value="よく分からない" />よく分からない</label>
-            </div>
-          </fieldset>
-
-          <fieldset class="question" data-question="4">
-            <legend>Q5. 相手との距離感は？</legend>
-            <div class="option-grid">
-              <label><input type="radio" name="distance" value="かなり親しい" required />かなり親しい</label>
-              <label><input type="radio" name="distance" value="そこそこ親しい" />そこそこ親しい</label>
-              <label><input type="radio" name="distance" value="気を遣う関係" />気を遣う関係</label>
-              <label><input type="radio" name="distance" value="よく分からない" />よく分からない</label>
             </div>
           </fieldset>
 
@@ -185,6 +185,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260707-6"></script>
+    <script src="script.js?v=20260707-7"></script>
   </body>
 </html>
