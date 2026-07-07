@@ -35,10 +35,10 @@ let copyStatusTimer = null;
 
 const answerLabels = {
   recipient: "誰へのプレゼントか",
+  distance: "相手との距離感",
   purpose: "目的",
   budget: "予算",
   vibe: "相手の雰囲気",
-  distance: "相手との距離感",
   avoid: "避けたいもの",
 };
 
@@ -94,7 +94,7 @@ const genreProfiles = {
   },
 };
 
-const questionNames = ["recipient", "purpose", "budget", "vibe", "distance", "avoid"];
+const questionNames = ["recipient", "distance", "purpose", "budget", "vibe", "avoid"];
 
 function showScreen(screenName) {
   Object.values(screens).forEach((screen) => screen.classList.remove("screen-active"));
@@ -309,11 +309,11 @@ function diagnose(answers) {
     phrase: buildGiftPhrase(answers),
     firstCandidateSupport: buildFirstCandidateSupport(topGenres[0]),
     searchGuidance:
-      "検索したら、上から全部見なくてOKです。評価が高いものを3つだけ開いて、レビュー数・到着日・個包装かどうか・渡しやすい見た目を確認してください。",
+      "検索したら、上から全部見なくてOKです。見るポイントは、レビュー数・到着日・個包装かどうか・渡しやすい見た目の4つです。",
     nextSteps: [
       "まず検索ワードをコピーする",
       "Amazon・楽天・Yahooのどれかで検索する",
-      "評価が高い商品を3つだけ見比べて、迷ったら第一候補に近いものを選ぶ",
+      "評価が高い商品を3つだけ開き、レビュー数・到着日・個包装・見た目で比べる。迷ったら、第一候補に近いものを選べばOKです。",
     ],
   };
 }
