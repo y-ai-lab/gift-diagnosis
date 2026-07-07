@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>プレゼント選び診断</title>
-    <link rel="stylesheet" href="styles.css?v=20260707-3" />
+    <link rel="stylesheet" href="styles.css?v=20260707-4" />
   </head>
   <body>
     <main class="app-shell">
@@ -16,23 +16,26 @@
           <p class="lead">
             相手・予算・避けたいものを選ぶだけで、外しにくい方向性を3分で整理します。
           </p>
+          <p class="outcome-note">
+            診断後に、第一候補・第二候補・避けるもの・検索ワード・渡す時の一言まで出します。
+          </p>
           <button class="primary-button" type="button" id="start-button">3分で候補を絞る</button>
           <p class="note">
-            商品をいきなり探す前に、まず「何系を選べばいいか」を決める診断です。候補が多すぎて決められない人でも、探す方向を絞りやすくなります。
+            Amazonや楽天を開く前に、まず「何系を選ぶか」だけ決めます。候補が多すぎて決められない人向けの診断です。
           </p>
         </div>
       </section>
 
       <section class="screen" id="quiz-screen" aria-labelledby="quiz-title">
         <div class="screen-header">
-          <p class="eyebrow">5 questions</p>
+          <p class="eyebrow">6 questions</p>
           <h2 id="quiz-title">診断入力</h2>
           <p>分かる範囲で選んでください。迷ったら一番近いものを選べば大丈夫です。</p>
         </div>
 
         <form id="quiz-form" class="quiz-form">
           <div class="quiz-progress" aria-live="polite">
-            <span id="progress-text">1 / 5</span>
+            <span id="progress-text">1 / 6</span>
             <div class="progress-track" aria-hidden="true">
               <div class="progress-bar" id="progress-bar"></div>
             </div>
@@ -82,11 +85,21 @@
           </fieldset>
 
           <fieldset class="question" data-question="4">
-            <legend>Q5. 避けたいものは？</legend>
+            <legend>Q5. 相手との距離感は？</legend>
+            <div class="option-grid">
+              <label><input type="radio" name="distance" value="かなり親しい" required />かなり親しい</label>
+              <label><input type="radio" name="distance" value="そこそこ親しい" />そこそこ親しい</label>
+              <label><input type="radio" name="distance" value="気を遣う関係" />気を遣う関係</label>
+              <label><input type="radio" name="distance" value="よく分からない" />よく分からない</label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question" data-question="5">
+            <legend>Q6. 避けたいものは？</legend>
             <div class="option-grid">
               <label><input type="radio" name="avoid" value="食べ物" required />食べ物</label>
               <label><input type="radio" name="avoid" value="香りもの" />香りもの</label>
-              <label><input type="radio" name="avoid" value="高すぎるもの" />高すぎるもの</label>
+              <label><input type="radio" name="avoid" value="相手に気を遣わせそうなもの" />相手に気を遣わせそうなもの</label>
               <label><input type="radio" name="avoid" value="形に残るもの" />形に残るもの</label>
               <label><input type="radio" name="avoid" value="特になし" />特になし</label>
             </div>
@@ -172,6 +185,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260707-5"></script>
+    <script src="script.js?v=20260707-6"></script>
   </body>
 </html>
