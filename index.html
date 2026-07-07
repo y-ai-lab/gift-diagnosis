@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>プレゼント選び診断</title>
-    <link rel="stylesheet" href="styles.css?v=20260707-2" />
+    <link rel="stylesheet" href="styles.css?v=20260707-3" />
   </head>
   <body>
     <main class="app-shell">
@@ -12,13 +12,13 @@
         <div class="hero">
           <div class="gift-mark" aria-hidden="true">🎁</div>
           <p class="eyebrow">Gift Direction Finder</p>
-          <h1 id="top-title">プレゼント選びで毎回悩みすぎる人へ</h1>
+          <h1 id="top-title">プレゼント選び、毎回しんどくないですか？</h1>
           <p class="lead">
-            相手・予算・避けたいものを選ぶだけで、外しにくいプレゼントの方向性を3分で整理します。
+            相手・予算・避けたいものを選ぶだけで、外しにくい方向性を3分で整理します。
           </p>
-          <button class="primary-button" type="button" id="start-button">診断をはじめる</button>
+          <button class="primary-button" type="button" id="start-button">3分で候補を絞る</button>
           <p class="note">
-            商品をいきなり探す前に、まず「何系を選べばいいか」を決める診断です。優柔不断な人でも、候補を絞りやすくなります。
+            商品をいきなり探す前に、まず「何系を選べばいいか」を決める診断です。候補が多すぎて決められない人でも、探す方向を絞りやすくなります。
           </p>
         </div>
       </section>
@@ -121,6 +121,7 @@
         <div class="result-block">
           <h3>第一候補・第二候補</h3>
           <div class="candidate-list" id="candidate-list"></div>
+          <p class="support-text" id="first-candidate-support"></p>
         </div>
 
         <div class="result-block">
@@ -150,6 +151,7 @@
 
         <div class="result-block">
           <h3>商品を探す</h3>
+          <p class="support-text" id="search-guidance"></p>
           <div class="shop-links" id="shop-links"></div>
         </div>
 
@@ -170,6 +172,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260707-2"></script>
+    <script src="script.js?v=20260707-5"></script>
   </body>
 </html>

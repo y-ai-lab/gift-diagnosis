@@ -16,6 +16,7 @@ const resultSummary = document.querySelector("#result-summary");
 const conditionList = document.querySelector("#condition-list");
 const directionText = document.querySelector("#direction-text");
 const candidateList = document.querySelector("#candidate-list");
+const firstCandidateSupport = document.querySelector("#first-candidate-support");
 const avoidList = document.querySelector("#avoid-list");
 const safeChoiceText = document.querySelector("#safe-choice-text");
 const reasonText = document.querySelector("#reason-text");
@@ -24,6 +25,7 @@ const copyKeywordButton = document.querySelector("#copy-keyword-button");
 const copyStatus = document.querySelector("#copy-status");
 const keywordList = document.querySelector("#keyword-list");
 const shopLinks = document.querySelector("#shop-links");
+const searchGuidance = document.querySelector("#search-guidance");
 const giftPhrase = document.querySelector("#gift-phrase");
 const nextStepList = document.querySelector("#next-step-list");
 
@@ -268,12 +270,31 @@ function diagnose(answers) {
     keywords: searchKeywords,
     primaryKeyword: searchKeywords[0],
     phrase: buildGiftPhrase(answers),
+    firstCandidateSupport: buildFirstCandidateSupport(topGenres[0]),
+    searchGuidance:
+      "検索したら、上から全部見なくてOKです。評価が高いものを3つだけ開いて、見た目・価格・渡しやすさで決めてください。",
     nextSteps: [
       "まず検索ワードをコピーする",
       "Amazon・楽天・Yahooのどれかで検索する",
-      "迷ったら「第一候補」に近い商品を3つだけ見比べる",
+      "評価が高い商品を3つだけ見比べて、迷ったら第一候補に近いものを選ぶ",
     ],
   };
+}
+
+function buildFirstCandidateSupport(firstGenre) {
+  if (firstGenre.key === "food" || firstGenre.key === "stylish") {
+    return "迷ったら第一候補でOKです。今回の条件では、相手に気を遣わせにくく、好みも大きく外しにくい方向性です。";
+  }
+
+  if (firstGenre.key === "practical") {
+    return "迷ったら第一候補でOKです。今回の条件では、使い道が分かりやすく、無駄になりにくい方向性です。";
+  }
+
+  if (firstGenre.key === "experience") {
+    return "迷ったら第一候補でOKです。今回の条件では、物を増やさずに印象に残しやすい方向性です。";
+  }
+
+  return "迷ったら第一候補でOKです。今回の条件では、いちばん外しにくい方向性です。";
 }
 
 function buildDirection(answers, genres) {
@@ -524,9 +545,11 @@ function renderResult(result, answers) {
 
   resultSummary.textContent = `${answers.recipient}への${answers.purpose}で迷いにくい候補を整理しました。`;
   directionText.textContent = result.direction;
+  firstCandidateSupport.textContent = result.firstCandidateSupport;
   safeChoiceText.textContent = result.safeChoice;
   reasonText.textContent = result.reason;
   primaryKeyword.textContent = result.primaryKeyword;
+  searchGuidance.textContent = result.searchGuidance;
   giftPhrase.textContent = result.phrase;
   copyStatus.textContent = "";
 
@@ -542,9 +565,7 @@ async function copySearchKeyword() {
   copyStatus.textContent = "";
 
   try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(currentSearchKeyword);
-    } else {
+    const fallbackCopy = () => {
       const textarea = document.createElement("textarea");
       textarea.value = currentSearchKeyword;
       textarea.setAttribute("readonly", "");
@@ -552,9 +573,21 @@ async function copySearchKeyword() {
       textarea.style.left = "-9999px";
       document.body.appendChild(textarea);
       textarea.select();
-      const copied = document.execCommand("copy");
-      textarea.remove();
-      if (!copied) throw new Error("copy command failed");
+      try {
+        document.execCommand("copy");
+      } finally {
+        textarea.remove();
+      }
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(currentSearchKeyword);
+      } catch (error) {
+        fallbackCopy();
+      }
+    } else {
+      fallbackCopy();
     }
 
     copyStatus.textContent = "コピーしました";
