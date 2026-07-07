@@ -38,6 +38,7 @@ const answerLabels = {
   purpose: "目的",
   budget: "予算",
   vibe: "相手の雰囲気",
+  distance: "相手との距離感",
   avoid: "避けたいもの",
 };
 
@@ -93,7 +94,7 @@ const genreProfiles = {
   },
 };
 
-const questionNames = ["recipient", "purpose", "budget", "vibe", "avoid"];
+const questionNames = ["recipient", "purpose", "budget", "vibe", "distance", "avoid"];
 
 function showScreen(screenName) {
   Object.values(screens).forEach((screen) => screen.classList.remove("screen-active"));
@@ -122,6 +123,7 @@ function getAnswers() {
     purpose: data.get("purpose"),
     budget: data.get("budget"),
     vibe: data.get("vibe"),
+    distance: data.get("distance"),
     avoid: data.get("avoid"),
   };
 }
@@ -251,6 +253,41 @@ function diagnose(answers) {
     addScore(scores, "experience", 3);
   }
 
+  if (answers.distance === "かなり親しい") {
+    addScore(scores, "stylish", 2);
+    addScore(scores, "premium", 2);
+    addScore(scores, "experience", 1);
+  }
+
+  if (answers.distance === "そこそこ親しい") {
+    addScore(scores, "practical", 2);
+    addScore(scores, "food", 2);
+    addScore(scores, "safe", 1);
+  }
+
+  if (answers.distance === "気を遣う関係") {
+    addScore(scores, "safe", 4);
+    addScore(scores, "food", 3);
+    addScore(scores, "practical", 2);
+    addScore(scores, "premium", -2);
+    addScore(scores, "experience", -1);
+  }
+
+  if (answers.distance === "よく分からない") {
+    addScore(scores, "safe", 4);
+    addScore(scores, "food", 2);
+    addScore(scores, "practical", 2);
+  }
+
+  if (answers.avoid === "相手に気を遣わせそうなもの") {
+    addScore(scores, "safe", 4);
+    addScore(scores, "food", 3);
+    addScore(scores, "practical", 3);
+    addScore(scores, "premium", -3);
+    addScore(scores, "experience", -1);
+    addScore(scores, "stylish", -1);
+  }
+
   const excludedGenres = getExcludedGenres(answers);
   const topGenres = Object.entries(scores)
     .filter(([key]) => !excludedGenres.has(key))
@@ -272,7 +309,7 @@ function diagnose(answers) {
     phrase: buildGiftPhrase(answers),
     firstCandidateSupport: buildFirstCandidateSupport(topGenres[0]),
     searchGuidance:
-      "検索したら、上から全部見なくてOKです。評価が高いものを3つだけ開いて、見た目・価格・渡しやすさで決めてください。",
+      "検索したら、上から全部見なくてOKです。評価が高いものを3つだけ開いて、レビュー数・到着日・個包装かどうか・渡しやすい見た目を確認してください。",
     nextSteps: [
       "まず検索ワードをコピーする",
       "Amazon・楽天・Yahooのどれかで検索する",
@@ -298,6 +335,14 @@ function buildFirstCandidateSupport(firstGenre) {
 }
 
 function buildDirection(answers, genres) {
+  if (answers.distance === "気を遣う関係" || answers.avoid === "相手に気を遣わせそうなもの") {
+    return "重く見えない消えもの・実用ギフトタイプ";
+  }
+
+  if (answers.distance === "よく分からない") {
+    return "相手に気を遣わせにくい安全ギフトタイプ";
+  }
+
   if (answers.recipient === "職場の人" || answers.purpose === "お礼" || answers.purpose === "ちょっとした贈り物") {
     return "気を遣わせない消えもの・無難ギフトタイプ";
   }
@@ -332,8 +377,10 @@ function buildAvoidItems(answers) {
     base.push("香りが強いもの、入浴剤、香水、ハンドクリーム系");
   }
 
-  if (answers.avoid === "高すぎるもの") {
-    base.push("相手が気を遣うほど高額に見えるもの");
+  if (answers.avoid === "相手に気を遣わせそうなもの") {
+    base.push("高級感を強く出しすぎるもの");
+    base.push("アクセサリーなど意味が重くなりやすいもの");
+    base.push("大きすぎるもの、相手の好みが強く出るもの");
   }
 
   if (answers.avoid === "形に残るもの") {
@@ -353,6 +400,10 @@ function buildAvoidItems(answers) {
 }
 
 function buildSafeChoice(answers, genres) {
+  if (answers.avoid === "相手に気を遣わせそうなもの" || answers.distance === "気を遣う関係") {
+    return "迷ったら、消えものや実用的な小さめギフトを選ぶのが安全です。価格が分かりにくく、大げさに見えないものなら、相手も受け取りやすくなります。";
+  }
+
   if (answers.avoid === "食べ物") {
     return "迷ったら、タオルや消耗品など使い道が分かりやすいものを選ぶのが安全です。食品を外しても、見た目の整った実用品なら受け取りやすくなります。";
   }
@@ -379,6 +430,22 @@ function buildReason(answers, genres) {
     reasons.push("職場の人へのお礼なので、好みが出すぎるものより、受け取りやすく気を遣わせにくい方向性を優先しました。");
   } else {
     reasons.push(`${answers.recipient}への${answers.purpose}なので、相手との関係性と予算に合いやすい方向性を優先しました。`);
+  }
+
+  if (answers.distance === "かなり親しい") {
+    reasons.push("相手との距離感が近いので、少し相手の好みや印象に残る方向性も候補に入れています。");
+  }
+
+  if (answers.distance === "そこそこ親しい") {
+    reasons.push("そこそこ親しい関係なので、実用性・消えもの・無難さのバランスを重視しています。");
+  }
+
+  if (answers.distance === "気を遣う関係") {
+    reasons.push("相手との距離感を考えると、今回は重すぎず気を遣わせにくい実用系・消えもの系が安全です。");
+  }
+
+  if (answers.distance === "よく分からない") {
+    reasons.push("距離感がよく分からない場合でも外しにくいように、個性が強すぎない安全寄りの候補にしています。");
   }
 
   if (answers.avoid !== "特になし") {
@@ -430,6 +497,8 @@ function purposeKeyword(purpose) {
 }
 
 function moodKeyword(answers) {
+  if (answers.distance === "気を遣う関係" || answers.avoid === "相手に気を遣わせそうなもの") return "気軽";
+  if (answers.distance === "よく分からない") return "無難";
   if (answers.recipient === "職場の人" || answers.vibe === "よく分からない") return "無難";
   if (answers.vibe === "おしゃれなものが好き") return "おしゃれ";
   if (answers.vibe === "実用的なものが好き") return "実用的";
@@ -441,7 +510,8 @@ function safetyKeyword(answers) {
   if (answers.avoid === "香りもの") return "香りなし";
   if (answers.avoid === "食べ物") return "食品以外";
   if (answers.avoid === "形に残るもの") return "消えもの";
-  if (answers.avoid === "高すぎるもの") return "気軽";
+  if (answers.avoid === "相手に気を遣わせそうなもの") return "気を遣わせない";
+  if (answers.distance === "気を遣う関係") return "重くない";
   return "";
 }
 
