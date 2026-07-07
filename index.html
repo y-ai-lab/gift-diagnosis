@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>プレゼント選び診断</title>
-    <link rel="stylesheet" href="styles.css?v=20260707" />
+    <link rel="stylesheet" href="styles.css?v=20260707-2" />
   </head>
   <body>
     <main class="app-shell">
@@ -12,13 +12,13 @@
         <div class="hero">
           <div class="gift-mark" aria-hidden="true">🎁</div>
           <p class="eyebrow">Gift Direction Finder</p>
-          <h1 id="top-title">プレゼント選び診断</h1>
+          <h1 id="top-title">プレゼント選びで毎回悩みすぎる人へ</h1>
           <p class="lead">
-            相手・予算・目的に答えるだけで、外しにくいプレゼントの方向性がわかります。
+            相手・予算・避けたいものを選ぶだけで、外しにくいプレゼントの方向性を3分で整理します。
           </p>
           <button class="primary-button" type="button" id="start-button">診断をはじめる</button>
           <p class="note">
-            商品を直接おすすめするのではなく、まずはプレゼントのジャンルを整理する診断です。
+            商品をいきなり探す前に、まず「何系を選べばいいか」を決める診断です。優柔不断な人でも、候補を絞りやすくなります。
           </p>
         </div>
       </section>
@@ -113,9 +113,24 @@
           <dl class="condition-list" id="condition-list"></dl>
         </div>
 
+        <div class="result-block result-highlight">
+          <h3>あなたにおすすめの方向性</h3>
+          <p class="direction-text" id="direction-text"></p>
+        </div>
+
         <div class="result-block">
-          <h3>おすすめジャンル</h3>
-          <div class="genre-list" id="genre-list"></div>
+          <h3>第一候補・第二候補</h3>
+          <div class="candidate-list" id="candidate-list"></div>
+        </div>
+
+        <div class="result-block">
+          <h3>避けた方がいいもの</h3>
+          <ul class="avoid-list" id="avoid-list"></ul>
+        </div>
+
+        <div class="result-block">
+          <h3>迷った時の無難な選び方</h3>
+          <p class="advice-text" id="safe-choice-text"></p>
         </div>
 
         <div class="result-block">
@@ -124,13 +139,28 @@
         </div>
 
         <div class="result-block">
-          <h3>検索キーワード</h3>
+          <h3>そのまま使える検索ワード</h3>
+          <div class="search-word-box">
+            <p id="primary-keyword"></p>
+            <button class="secondary-button copy-button" type="button" id="copy-keyword-button">検索ワードをコピー</button>
+          </div>
+          <p class="copy-status" id="copy-status" aria-live="polite"></p>
           <div class="keyword-list" id="keyword-list"></div>
+        </div>
+
+        <div class="result-block">
+          <h3>商品を探す</h3>
+          <div class="shop-links" id="shop-links"></div>
+        </div>
+
+        <div class="result-block">
+          <h3>渡す時の一言</h3>
+          <p class="gift-phrase" id="gift-phrase"></p>
         </div>
 
         <div class="next-step">
           <h3>次にやること</h3>
-          <p id="next-step-text"></p>
+          <ol class="step-list" id="next-step-list"></ol>
         </div>
 
         <div class="form-actions">
@@ -140,6 +170,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260707"></script>
+    <script src="script.js?v=20260707-2"></script>
   </body>
 </html>
