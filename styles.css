@@ -462,6 +462,12 @@ input[type="checkbox"] {
   font-weight: 900;
 }
 
+.conclusion-action {
+  margin-top: 10px;
+  font-weight: 900;
+  color: var(--green-dark);
+}
+
 .avoid-list,
 .category-suggestion-list,
 .step-list {

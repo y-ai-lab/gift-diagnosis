@@ -100,7 +100,7 @@
             <div class="option-grid">
               <label><input type="checkbox" name="avoid" value="食べ物" />食べ物</label>
               <label><input type="checkbox" name="avoid" value="香りもの" />香りもの</label>
-              <label><input type="checkbox" name="avoid" value="相手に気を遣わせそうなもの" />相手に気を遣わせそうなもの</label>
+              <label><input type="checkbox" name="avoid" value="高すぎる・重く受け取られそうなもの" />高すぎる・重く受け取られそうなもの</label>
               <label><input type="checkbox" name="avoid" value="形に残るもの" />形に残るもの</label>
               <label><input type="checkbox" name="avoid" value="特になし" />特になし</label>
             </div>
@@ -122,14 +122,16 @@
           <p id="result-summary"></p>
         </div>
 
+        <div class="result-block result-highlight">
+          <h3>今回の結論</h3>
+          <p class="direction-text" id="direction-text"></p>
+          <p class="support-text" id="conclusion-reason"></p>
+          <p class="support-text conclusion-action" id="conclusion-action"></p>
+        </div>
+
         <div class="result-block">
           <h3>今回の条件</h3>
           <dl class="condition-list" id="condition-list"></dl>
-        </div>
-
-        <div class="result-block result-highlight">
-          <h3>あなたにおすすめの方向性</h3>
-          <p class="direction-text" id="direction-text"></p>
         </div>
 
         <div class="result-block">
@@ -139,23 +141,23 @@
         </div>
 
         <div class="result-block">
-          <h3>避けた方がいいもの</h3>
-          <ul class="avoid-list" id="avoid-list"></ul>
-        </div>
-
-        <div class="result-block">
           <h3>迷ったらこの3カテゴリ</h3>
           <ol class="category-suggestion-list" id="category-suggestion-list"></ol>
         </div>
 
         <div class="result-block">
-          <h3>迷った時の無難な選び方</h3>
-          <p class="advice-text" id="safe-choice-text"></p>
+          <h3>選んだ理由</h3>
+          <p id="reason-text"></p>
         </div>
 
         <div class="result-block">
-          <h3>選んだ理由</h3>
-          <p id="reason-text"></p>
+          <h3>避けた方がいいもの</h3>
+          <ul class="avoid-list" id="avoid-list"></ul>
+        </div>
+
+        <div class="result-block">
+          <h3>迷った時の無難な選び方</h3>
+          <p class="advice-text" id="safe-choice-text"></p>
         </div>
 
         <div class="result-block">
@@ -169,7 +171,7 @@
         </div>
 
         <div class="result-block">
-          <h3>商品を探す</h3>
+          <h3>この条件で候補を3つだけ探す</h3>
           <p class="support-text" id="search-guidance"></p>
           <div class="shop-links" id="shop-links"></div>
         </div>
@@ -191,6 +193,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260708-1"></script>
+    <script src="script.js?v=20260708-2"></script>
   </body>
 </html>

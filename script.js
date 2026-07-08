@@ -15,6 +15,8 @@ const submitButton = document.querySelector("#submit-button");
 const resultSummary = document.querySelector("#result-summary");
 const conditionList = document.querySelector("#condition-list");
 const directionText = document.querySelector("#direction-text");
+const conclusionReason = document.querySelector("#conclusion-reason");
+const conclusionAction = document.querySelector("#conclusion-action");
 const candidateList = document.querySelector("#candidate-list");
 const firstCandidateSupport = document.querySelector("#first-candidate-support");
 const avoidList = document.querySelector("#avoid-list");
@@ -33,6 +35,8 @@ const nextStepList = document.querySelector("#next-step-list");
 let currentQuestion = 0;
 let currentSearchKeyword = "";
 let copyStatusTimer = null;
+
+const heavyAvoidValue = "高すぎる・重く受け取られそうなもの";
 
 const answerLabels = {
   recipient: "誰へのプレゼントか",
@@ -295,7 +299,7 @@ function diagnose(answers) {
     addScore(scores, "practical", 2);
   }
 
-  if (hasAvoid(answers, "相手に気を遣わせそうなもの")) {
+  if (hasAvoid(answers, heavyAvoidValue)) {
     addScore(scores, "safe", 4);
     addScore(scores, "food", 3);
     addScore(scores, "practical", 3);
@@ -311,13 +315,16 @@ function diagnose(answers) {
     .slice(0, 3)
     .map(([key]) => ({ key, ...genreProfiles[key] }));
 
-  const direction = buildDirection(answers, topGenres);
+  const direction = buildConclusionText(topGenres[0]);
   const searchTips = buildSearchTips(topGenres[0]);
+  const decisionPoints = buildDecisionPoints(topGenres[0]);
   const categorySuggestions = buildCategorySuggestions(topGenres[0]);
   const searchKeywords = buildKeywords(answers, topGenres, categorySuggestions);
 
   return {
     direction,
+    conclusionReason: buildConclusionReason(answers, topGenres),
+    conclusionAction: "検索ワードを使って、商品候補を3つだけ見てみましょう。",
     genres: topGenres,
     categorySuggestions,
     avoidItems: buildAvoidItems(answers),
@@ -329,9 +336,9 @@ function diagnose(answers) {
     firstCandidateSupport: buildFirstCandidateSupport(topGenres[0]),
     searchGuidance: searchTips.guidance,
     nextSteps: [
-      "まず検索ワードをコピーする",
+      "検索ワードをコピーする",
       "Amazon・楽天・Yahooのどれかで検索する",
-      searchTips.nextStep,
+      `候補を3つだけ開いて、${decisionPoints}で決める。迷ったら、第一候補に近いものを選べばOKです。`,
     ],
   };
 }
@@ -339,38 +346,39 @@ function diagnose(answers) {
 function buildSearchTips(firstGenre) {
   const tips = {
     food: {
-      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、個包装・賞味期限・レビュー数・到着日の4つです。",
-      nextStep: "評価が高い商品を3つだけ開き、個包装・賞味期限・レビュー数・到着日で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      guidance: "全部見なくてOKです。評価が高い商品を3つだけ開いて、個包装・賞味期限・レビュー数・到着日を見比べてください。",
     },
     practical: {
-      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、サイズ感・色の無難さ・箱入りかどうか・レビュー数の4つです。",
-      nextStep:
-        "評価が高い商品を3つだけ開き、サイズ感・色の無難さ・箱入りかどうか・レビュー数で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      guidance: "全部見なくてOKです。評価が高い商品を3つだけ開いて、サイズ感・色の無難さ・箱入りかどうか・レビュー数を見比べてください。",
     },
     relax: {
-      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、香りの強さ・肌に合いやすいか・パッケージ・レビュー数の4つです。",
-      nextStep:
-        "評価が高い商品を3つだけ開き、香りの強さ・肌に合いやすいか・パッケージ・レビュー数で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      guidance: "全部見なくてOKです。評価が高い商品を3つだけ開いて、香りの強さ・肌に合いやすいか・パッケージ・レビュー数を見比べてください。",
     },
     experience: {
-      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、有効期限・使えるエリア・予約のしやすさ・相手が行きやすいかの4つです。",
-      nextStep:
-        "候補を3つだけ開き、有効期限・使えるエリア・予約のしやすさ・相手が行きやすいかで比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      guidance: "全部見なくてOKです。候補を3つだけ開いて、有効期限・使えるエリア・予約のしやすさ・相手が行きやすいかを見比べてください。",
     },
     stylish: {
-      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、渡しやすい見た目・レビュー数・到着日・相手に気を遣わせない価格感の4つです。",
-      nextStep:
-        "評価が高い商品を3つだけ開き、渡しやすい見た目・レビュー数・到着日・相手に気を遣わせない価格感で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      guidance: "全部見なくてOKです。評価が高い商品を3つだけ開いて、渡しやすい見た目・レビュー数・到着日・重く見えない価格感を見比べてください。",
     },
   };
 
   return (
     tips[firstGenre.key] || {
-      guidance: "検索したら、上から全部見なくてOKです。見るポイントは、レビュー数・到着日・渡しやすい見た目・相手に気を遣わせない価格感の4つです。",
-      nextStep:
-        "評価が高い商品を3つだけ開き、レビュー数・到着日・見た目・相手に気を遣わせない価格感で比べる。迷ったら、第一候補に近いものを選べばOKです。",
+      guidance: "全部見なくてOKです。評価が高い商品を3つだけ開いて、レビュー数・到着日・渡しやすい見た目・重く見えない価格感を見比べてください。",
     }
   );
+}
+
+function buildDecisionPoints(firstGenre) {
+  const points = {
+    food: "個包装・賞味期限・到着日",
+    practical: "サイズ感・色の無難さ・箱入りかどうか",
+    relax: "香りの強さ・パッケージ・レビュー数",
+    experience: "有効期限・使えるエリア・予約のしやすさ",
+    stylish: "見た目・価格・渡しやすさ",
+  };
+
+  return points[firstGenre.key] || "見た目・価格・渡しやすさ";
 }
 
 function buildCategorySuggestions(firstGenre) {
@@ -403,8 +411,24 @@ function buildFirstCandidateSupport(firstGenre) {
   return "迷ったら第一候補でOKです。今回の条件では、いちばん外しにくい方向性です。";
 }
 
+function buildConclusionText(firstGenre) {
+  return `今回は${firstGenre.candidate}系を第一候補にすると選びやすいです。`;
+}
+
+function buildConclusionReason(answers, genres) {
+  if (answers.distance === "気を遣う関係" || hasAvoid(answers, heavyAvoidValue)) {
+    return "相手との距離感と予算を考えると、重くなりにくく、受け取りやすいジャンルだからです。";
+  }
+
+  if (hasAvoid(answers, "食べ物") || hasAvoid(answers, "香りもの") || hasAvoid(answers, "形に残るもの")) {
+    return "避けたい条件を外しながら、渡しやすさと探しやすさのバランスを取りました。";
+  }
+
+  return `相手との関係・予算・雰囲気を考えると、${genres[0].title}が候補を絞りやすいからです。`;
+}
+
 function buildDirection(answers, genres) {
-  if (answers.distance === "気を遣う関係" || hasAvoid(answers, "相手に気を遣わせそうなもの")) {
+  if (answers.distance === "気を遣う関係" || hasAvoid(answers, heavyAvoidValue)) {
     return "重く見えない消えもの・実用ギフトタイプ";
   }
 
@@ -446,7 +470,7 @@ function buildAvoidItems(answers) {
     base.push("香りが強いもの、入浴剤、香水、ハンドクリーム系");
   }
 
-  if (hasAvoid(answers, "相手に気を遣わせそうなもの")) {
+  if (hasAvoid(answers, heavyAvoidValue)) {
     base.push("高級感を強く出しすぎるもの");
     base.push("アクセサリーなど意味が重くなりやすいもの");
     base.push("大きすぎるもの、相手の好みが強く出るもの");
@@ -473,7 +497,7 @@ function buildSafeChoice(answers, genres) {
     return "迷ったら、香りが残りにくいタオルや小さめの実用品を選ぶのが安全です。食品と香りものを外しても、使い道が分かりやすいものなら候補を絞りやすくなります。";
   }
 
-  if (hasAvoid(answers, "相手に気を遣わせそうなもの") || answers.distance === "気を遣う関係") {
+  if (hasAvoid(answers, heavyAvoidValue) || answers.distance === "気を遣う関係") {
     return "迷ったら、消えものや実用的な小さめギフトを選ぶのが安全です。価格が分かりにくく、大げさに見えないものなら、相手も受け取りやすくなります。";
   }
 
@@ -570,7 +594,7 @@ function purposeKeyword(purpose) {
 }
 
 function moodKeyword(answers) {
-  if (answers.distance === "気を遣う関係" || hasAvoid(answers, "相手に気を遣わせそうなもの")) return "気軽";
+  if (answers.distance === "気を遣う関係" || hasAvoid(answers, heavyAvoidValue)) return "気軽";
   if (answers.distance === "よく分からない") return "無難";
   if (answers.recipient === "職場の人" || answers.vibe === "よく分からない") return "無難";
   if (answers.vibe === "おしゃれなものが好き") return "おしゃれ";
@@ -584,7 +608,7 @@ function safetyKeyword(answers) {
   if (hasAvoid(answers, "食べ物")) words.push("食品以外");
   if (hasAvoid(answers, "香りもの")) words.push("香りなし");
   if (hasAvoid(answers, "形に残るもの")) words.push("消えもの");
-  if (hasAvoid(answers, "相手に気を遣わせそうなもの")) words.push("気を遣わせない");
+  if (hasAvoid(answers, heavyAvoidValue)) words.push("重くない");
   if (words.length > 0) return words.slice(0, 2).join(" ");
   if (answers.distance === "気を遣う関係") return "重くない";
   return "";
@@ -704,8 +728,10 @@ function renderNextSteps(steps) {
 function renderResult(result, answers) {
   currentSearchKeyword = result.primaryKeyword;
 
-  resultSummary.textContent = `${answers.recipient}への${answers.purpose}で迷いにくい候補を整理しました。`;
+  resultSummary.textContent = "まず結論だけ見ればOKです。";
   directionText.textContent = result.direction;
+  conclusionReason.textContent = result.conclusionReason;
+  conclusionAction.textContent = result.conclusionAction;
   firstCandidateSupport.textContent = result.firstCandidateSupport;
   safeChoiceText.textContent = result.safeChoice;
   reasonText.textContent = result.reason;
