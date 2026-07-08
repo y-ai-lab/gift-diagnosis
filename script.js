@@ -15,7 +15,6 @@ const submitButton = document.querySelector("#submit-button");
 const resultSummary = document.querySelector("#result-summary");
 const conditionList = document.querySelector("#condition-list");
 const directionText = document.querySelector("#direction-text");
-const conclusionReason = document.querySelector("#conclusion-reason");
 const conclusionAction = document.querySelector("#conclusion-action");
 const candidateList = document.querySelector("#candidate-list");
 const firstCandidateSupport = document.querySelector("#first-candidate-support");
@@ -323,7 +322,6 @@ function diagnose(answers) {
 
   return {
     direction,
-    conclusionReason: buildConclusionReason(answers, topGenres),
     conclusionAction: "検索ワードを使って、商品候補を3つだけ見てみましょう。",
     genres: topGenres,
     categorySuggestions,
@@ -413,18 +411,6 @@ function buildFirstCandidateSupport(firstGenre) {
 
 function buildConclusionText(firstGenre) {
   return `今回は${firstGenre.candidate}系を第一候補にすると選びやすいです。`;
-}
-
-function buildConclusionReason(answers, genres) {
-  if (answers.distance === "気を遣う関係" || hasAvoid(answers, heavyAvoidValue)) {
-    return "相手との距離感と予算を考えると、重くなりにくく、受け取りやすいジャンルだからです。";
-  }
-
-  if (hasAvoid(answers, "食べ物") || hasAvoid(answers, "香りもの") || hasAvoid(answers, "形に残るもの")) {
-    return "避けたい条件を外しながら、渡しやすさと探しやすさのバランスを取りました。";
-  }
-
-  return `相手との関係・予算・雰囲気を考えると、${genres[0].title}が候補を絞りやすいからです。`;
 }
 
 function buildDirection(answers, genres) {
@@ -730,7 +716,6 @@ function renderResult(result, answers) {
 
   resultSummary.textContent = "まず結論だけ見ればOKです。";
   directionText.textContent = result.direction;
-  conclusionReason.textContent = result.conclusionReason;
   conclusionAction.textContent = result.conclusionAction;
   firstCandidateSupport.textContent = result.firstCandidateSupport;
   safeChoiceText.textContent = result.safeChoice;
