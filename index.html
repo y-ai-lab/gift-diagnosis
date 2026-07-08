@@ -96,12 +96,13 @@
 
           <fieldset class="question" data-question="5">
             <legend>Q6. 避けたいものは？</legend>
+            <p class="question-note">避けたいものは複数選べます。</p>
             <div class="option-grid">
-              <label><input type="radio" name="avoid" value="食べ物" required />食べ物</label>
-              <label><input type="radio" name="avoid" value="香りもの" />香りもの</label>
-              <label><input type="radio" name="avoid" value="相手に気を遣わせそうなもの" />相手に気を遣わせそうなもの</label>
-              <label><input type="radio" name="avoid" value="形に残るもの" />形に残るもの</label>
-              <label><input type="radio" name="avoid" value="特になし" />特になし</label>
+              <label><input type="checkbox" name="avoid" value="食べ物" />食べ物</label>
+              <label><input type="checkbox" name="avoid" value="香りもの" />香りもの</label>
+              <label><input type="checkbox" name="avoid" value="相手に気を遣わせそうなもの" />相手に気を遣わせそうなもの</label>
+              <label><input type="checkbox" name="avoid" value="形に残るもの" />形に残るもの</label>
+              <label><input type="checkbox" name="avoid" value="特になし" />特になし</label>
             </div>
           </fieldset>
 
@@ -140,6 +141,11 @@
         <div class="result-block">
           <h3>避けた方がいいもの</h3>
           <ul class="avoid-list" id="avoid-list"></ul>
+        </div>
+
+        <div class="result-block">
+          <h3>迷ったらこの3カテゴリ</h3>
+          <ol class="category-suggestion-list" id="category-suggestion-list"></ol>
         </div>
 
         <div class="result-block">
@@ -185,6 +191,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=20260707-8"></script>
+    <script src="script.js?v=20260708-1"></script>
   </body>
 </html>

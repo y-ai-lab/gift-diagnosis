@@ -239,6 +239,13 @@ legend {
   font-size: 1.08rem;
 }
 
+.question-note {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
 .option-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -274,7 +281,8 @@ label:hover {
   border-color: rgba(232, 93, 117, 0.45);
 }
 
-input[type="radio"] {
+input[type="radio"],
+input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--rose);
@@ -455,19 +463,27 @@ input[type="radio"] {
 }
 
 .avoid-list,
+.category-suggestion-list,
 .step-list {
   margin: 0;
   padding-left: 1.25rem;
 }
 
 .avoid-list li,
+.category-suggestion-list li,
 .step-list li {
   margin-bottom: 8px;
 }
 
 .avoid-list li:last-child,
+.category-suggestion-list li:last-child,
 .step-list li:last-child {
   margin-bottom: 0;
+}
+
+.category-suggestion-list li {
+  padding-left: 2px;
+  font-weight: 800;
 }
 
 .advice-text,

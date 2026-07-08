@@ -18,6 +18,7 @@ const directionText = document.querySelector("#direction-text");
 const candidateList = document.querySelector("#candidate-list");
 const firstCandidateSupport = document.querySelector("#first-candidate-support");
 const avoidList = document.querySelector("#avoid-list");
+const categorySuggestionList = document.querySelector("#category-suggestion-list");
 const safeChoiceText = document.querySelector("#safe-choice-text");
 const reasonText = document.querySelector("#reason-text");
 const primaryKeyword = document.querySelector("#primary-keyword");
@@ -118,19 +119,34 @@ function showQuestion(index) {
 
 function getAnswers() {
   const data = new FormData(quizForm);
+  const avoidValues = data.getAll("avoid");
   return {
     recipient: data.get("recipient"),
     purpose: data.get("purpose"),
     budget: data.get("budget"),
     vibe: data.get("vibe"),
     distance: data.get("distance"),
-    avoid: data.get("avoid"),
+    avoid: avoidValues.includes("特になし") ? ["特になし"] : avoidValues,
   };
 }
 
 function currentAnswerSelected() {
   const name = questionNames[currentQuestion];
   return Boolean(quizForm.querySelector(`input[name="${name}"]:checked`));
+}
+
+function currentQuestionErrorMessage() {
+  return questionNames[currentQuestion] === "avoid"
+    ? "避けたいものを1つ以上選んでください。"
+    : "この質問に答えてから次へ進んでください。";
+}
+
+function hasAvoid(answers, value) {
+  return Array.isArray(answers.avoid) && answers.avoid.includes(value);
+}
+
+function avoidLabel(answers) {
+  return Array.isArray(answers.avoid) ? answers.avoid.join("、") : answers.avoid;
 }
 
 function addScore(scores, key, point = 1) {
@@ -140,15 +156,15 @@ function addScore(scores, key, point = 1) {
 function getExcludedGenres(answers) {
   const excluded = new Set();
 
-  if (answers.avoid === "食べ物") {
+  if (hasAvoid(answers, "食べ物")) {
     excluded.add("food");
   }
 
-  if (answers.avoid === "香りもの") {
+  if (hasAvoid(answers, "香りもの")) {
     excluded.add("relax");
   }
 
-  if (answers.avoid === "形に残るもの") {
+  if (hasAvoid(answers, "形に残るもの")) {
     excluded.add("practical");
     excluded.add("stylish");
     excluded.add("premium");
@@ -279,7 +295,7 @@ function diagnose(answers) {
     addScore(scores, "practical", 2);
   }
 
-  if (answers.avoid === "相手に気を遣わせそうなもの") {
+  if (hasAvoid(answers, "相手に気を遣わせそうなもの")) {
     addScore(scores, "safe", 4);
     addScore(scores, "food", 3);
     addScore(scores, "practical", 3);
@@ -296,12 +312,14 @@ function diagnose(answers) {
     .map(([key]) => ({ key, ...genreProfiles[key] }));
 
   const direction = buildDirection(answers, topGenres);
-  const searchKeywords = buildKeywords(answers, topGenres);
   const searchTips = buildSearchTips(topGenres[0]);
+  const categorySuggestions = buildCategorySuggestions(topGenres[0]);
+  const searchKeywords = buildKeywords(answers, topGenres, categorySuggestions);
 
   return {
     direction,
     genres: topGenres,
+    categorySuggestions,
     avoidItems: buildAvoidItems(answers),
     safeChoice: buildSafeChoice(answers, topGenres),
     reason: buildReason(answers, topGenres),
@@ -355,6 +373,20 @@ function buildSearchTips(firstGenre) {
   );
 }
 
+function buildCategorySuggestions(firstGenre) {
+  const suggestions = {
+    food: ["個包装のお菓子", "ドリップコーヒーセット", "常温保存できるギフト"],
+    practical: ["小さめのタオルギフト", "ハンドクリームなしの実用セット", "シンプルな日用品ギフト"],
+    relax: ["香りが強すぎないケア用品", "パッケージが落ち着いたケアセット", "消耗品として使えるケアギフト"],
+    experience: ["カフェ・食事系体験", "リラックス系体験", "選べるカタログ型体験ギフト"],
+    stylish: ["シンプルな文房具", "小さめのデスク小物", "使い道が分かりやすい雑貨"],
+    premium: ["上質な消えものギフト", "落ち着いた定番ギフト", "大げさに見えない小さめギフト"],
+    safe: ["個包装のお菓子", "ドリンク系ギフト", "小さめの実用品ギフト"],
+  };
+
+  return suggestions[firstGenre.key] || ["個包装のお菓子", "ドリンク系ギフト", "小さめの実用品ギフト"];
+}
+
 function buildFirstCandidateSupport(firstGenre) {
   if (firstGenre.key === "food" || firstGenre.key === "stylish") {
     return "迷ったら第一候補でOKです。今回の条件では、相手に気を遣わせにくく、好みも大きく外しにくい方向性です。";
@@ -372,7 +404,7 @@ function buildFirstCandidateSupport(firstGenre) {
 }
 
 function buildDirection(answers, genres) {
-  if (answers.distance === "気を遣う関係" || answers.avoid === "相手に気を遣わせそうなもの") {
+  if (answers.distance === "気を遣う関係" || hasAvoid(answers, "相手に気を遣わせそうなもの")) {
     return "重く見えない消えもの・実用ギフトタイプ";
   }
 
@@ -384,7 +416,7 @@ function buildDirection(answers, genres) {
     return "気を遣わせない消えもの・無難ギフトタイプ";
   }
 
-  if (answers.avoid === "形に残るもの") {
+  if (hasAvoid(answers, "形に残るもの")) {
     return "手元に残りにくい消えものギフトタイプ";
   }
 
@@ -406,25 +438,25 @@ function buildDirection(answers, genres) {
 function buildAvoidItems(answers) {
   const base = [];
 
-  if (answers.avoid === "食べ物") {
+  if (hasAvoid(answers, "食べ物")) {
     base.push("お菓子・食品・コーヒー・お茶など食べ物や飲み物系");
   }
 
-  if (answers.avoid === "香りもの") {
+  if (hasAvoid(answers, "香りもの")) {
     base.push("香りが強いもの、入浴剤、香水、ハンドクリーム系");
   }
 
-  if (answers.avoid === "相手に気を遣わせそうなもの") {
+  if (hasAvoid(answers, "相手に気を遣わせそうなもの")) {
     base.push("高級感を強く出しすぎるもの");
     base.push("アクセサリーなど意味が重くなりやすいもの");
     base.push("大きすぎるもの、相手の好みが強く出るもの");
   }
 
-  if (answers.avoid === "形に残るもの") {
+  if (hasAvoid(answers, "形に残るもの")) {
     base.push("雑貨、マグカップ、文房具など長く残るもの");
   }
 
-  if (answers.avoid === "特になし") {
+  if (hasAvoid(answers, "特になし")) {
     base.push("サイズが関係するもの");
     base.push("好みが強く出るデザインのもの");
   }
@@ -437,19 +469,23 @@ function buildAvoidItems(answers) {
 }
 
 function buildSafeChoice(answers, genres) {
-  if (answers.avoid === "相手に気を遣わせそうなもの" || answers.distance === "気を遣う関係") {
+  if (hasAvoid(answers, "食べ物") && hasAvoid(answers, "香りもの")) {
+    return "迷ったら、香りが残りにくいタオルや小さめの実用品を選ぶのが安全です。食品と香りものを外しても、使い道が分かりやすいものなら候補を絞りやすくなります。";
+  }
+
+  if (hasAvoid(answers, "相手に気を遣わせそうなもの") || answers.distance === "気を遣う関係") {
     return "迷ったら、消えものや実用的な小さめギフトを選ぶのが安全です。価格が分かりにくく、大げさに見えないものなら、相手も受け取りやすくなります。";
   }
 
-  if (answers.avoid === "食べ物") {
+  if (hasAvoid(answers, "食べ物")) {
     return "迷ったら、タオルや消耗品など使い道が分かりやすいものを選ぶのが安全です。食品を外しても、見た目の整った実用品なら受け取りやすくなります。";
   }
 
-  if (answers.avoid === "香りもの") {
+  if (hasAvoid(answers, "香りもの")) {
     return "迷ったら、香りが残らない個包装のお菓子やドリンク系を選ぶのが安全です。香りの好みに左右されにくく、渡しやすさも保てます。";
   }
 
-  if (answers.avoid === "形に残るもの") {
+  if (hasAvoid(answers, "形に残るもの")) {
     return "迷ったら、食べ切れるお菓子やドリンク、体験チケットなど手元に残りにくいものを選ぶのが安全です。置き場所や好みの負担を減らせます。";
   }
 
@@ -485,8 +521,8 @@ function buildReason(answers, genres) {
     reasons.push("距離感がよく分からない場合でも外しにくいように、個性が強すぎない安全寄りの候補にしています。");
   }
 
-  if (answers.avoid !== "特になし") {
-    reasons.push(`避けたいものが「${answers.avoid}」なので、結果から該当しやすいジャンルを外しています。`);
+  if (!hasAvoid(answers, "特になし")) {
+    reasons.push(`避けたいものが「${avoidLabel(answers)}」なので、結果から該当しやすいジャンルを外しています。`);
   }
 
   reasons.push(`${answers.budget}の予算でも探しやすく、検索で候補を絞りやすい「${genres[0].candidate}」を第一候補にしています。`);
@@ -534,7 +570,7 @@ function purposeKeyword(purpose) {
 }
 
 function moodKeyword(answers) {
-  if (answers.distance === "気を遣う関係" || answers.avoid === "相手に気を遣わせそうなもの") return "気軽";
+  if (answers.distance === "気を遣う関係" || hasAvoid(answers, "相手に気を遣わせそうなもの")) return "気軽";
   if (answers.distance === "よく分からない") return "無難";
   if (answers.recipient === "職場の人" || answers.vibe === "よく分からない") return "無難";
   if (answers.vibe === "おしゃれなものが好き") return "おしゃれ";
@@ -544,21 +580,29 @@ function moodKeyword(answers) {
 }
 
 function safetyKeyword(answers) {
-  if (answers.avoid === "香りもの") return "香りなし";
-  if (answers.avoid === "食べ物") return "食品以外";
-  if (answers.avoid === "形に残るもの") return "消えもの";
-  if (answers.avoid === "相手に気を遣わせそうなもの") return "気を遣わせない";
+  const words = [];
+  if (hasAvoid(answers, "食べ物")) words.push("食品以外");
+  if (hasAvoid(answers, "香りもの")) words.push("香りなし");
+  if (hasAvoid(answers, "形に残るもの")) words.push("消えもの");
+  if (hasAvoid(answers, "相手に気を遣わせそうなもの")) words.push("気を遣わせない");
+  if (words.length > 0) return words.slice(0, 2).join(" ");
   if (answers.distance === "気を遣う関係") return "重くない";
   return "";
 }
 
-function buildKeywords(answers, genres) {
-  return genres.map((genre) =>
+function categoryKeyword(category) {
+  if (!category) return "";
+  return category.replace("小さめの", "小さめ ").replace("ギフト", "ギフト").trim();
+}
+
+function buildKeywords(answers, genres, categories) {
+  return genres.map((genre, index) =>
     [
       budgetKeyword(answers.budget),
       recipientKeyword(answers.recipient),
       purposeKeyword(answers.purpose),
       moodKeyword(answers),
+      index === 0 ? categoryKeyword(categories[0]) : "",
       genre.keyword,
       safetyKeyword(answers),
     ]
@@ -574,7 +618,7 @@ function renderConditions(answers) {
     const term = document.createElement("dt");
     const detail = document.createElement("dd");
     term.textContent = label;
-    detail.textContent = answers[key];
+    detail.textContent = key === "avoid" ? avoidLabel(answers) : answers[key];
     conditionList.append(term, detail);
   });
 }
@@ -603,6 +647,16 @@ function renderAvoidItems(items) {
     const li = document.createElement("li");
     li.textContent = item;
     avoidList.appendChild(li);
+  });
+}
+
+function renderCategorySuggestions(categories) {
+  categorySuggestionList.innerHTML = "";
+
+  categories.forEach((category) => {
+    const li = document.createElement("li");
+    li.textContent = category;
+    categorySuggestionList.appendChild(li);
   });
 }
 
@@ -663,6 +717,7 @@ function renderResult(result, answers) {
   renderConditions(answers);
   renderCandidates(result.genres);
   renderAvoidItems(result.avoidItems);
+  renderCategorySuggestions(result.categorySuggestions);
   renderKeywords(result.keywords);
   renderShopLinks(result.primaryKeyword);
   renderNextSteps(result.nextSteps);
@@ -724,7 +779,7 @@ prevButton.addEventListener("click", () => {
 
 nextButton.addEventListener("click", () => {
   if (!currentAnswerSelected()) {
-    formError.textContent = "この質問に答えてから次へ進んでください。";
+    formError.textContent = currentQuestionErrorMessage();
     return;
   }
 
@@ -735,6 +790,25 @@ questions.forEach((question) => {
   question.addEventListener("change", () => {
     formError.textContent = "";
   });
+});
+
+quizForm.addEventListener("change", (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || target.name !== "avoid") return;
+
+  const avoidInputs = [...quizForm.querySelectorAll('input[name="avoid"]')];
+  const noneInput = avoidInputs.find((input) => input.value === "特になし");
+
+  if (target.value === "特になし" && target.checked) {
+    avoidInputs.forEach((input) => {
+      if (input !== target) input.checked = false;
+    });
+    return;
+  }
+
+  if (target.checked && noneInput) {
+    noneInput.checked = false;
+  }
 });
 
 copyKeywordButton.addEventListener("click", copySearchKeyword);
@@ -754,7 +828,10 @@ quizForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   if (!currentAnswerSelected()) {
-    formError.textContent = "この質問に答えてから診断結果を見てください。";
+    formError.textContent =
+      questionNames[currentQuestion] === "avoid"
+        ? "避けたいものを1つ以上選んでください。"
+        : "この質問に答えてから診断結果を見てください。";
     return;
   }
 
