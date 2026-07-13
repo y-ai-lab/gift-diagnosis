@@ -318,7 +318,7 @@ function diagnose(answers) {
   const searchTips = buildSearchTips(topGenres[0]);
   const decisionPoints = buildDecisionPoints(topGenres[0]);
   const categorySuggestions = buildCategorySuggestions(topGenres[0]);
-  const searchKeywords = buildKeywords(answers, topGenres, categorySuggestions);
+  const searchKeywords = buildKeywords(answers, topGenres);
 
   return {
     direction,
@@ -560,65 +560,8 @@ function buildGiftPhrase(answers) {
   return "季節のごあいさつに、気軽に楽しめそうなものを選びました。";
 }
 
-function budgetKeyword(budget) {
-  if (budget === "1,000〜3,000円") return "3000円";
-  if (budget === "3,000〜5,000円") return "5000円";
-  if (budget === "5,000〜10,000円") return "10000円";
-  return "10000円以上";
-}
-
-function recipientKeyword(recipient) {
-  if (recipient === "職場の人") return "職場";
-  if (recipient === "その他") return "相手";
-  return recipient;
-}
-
-function purposeKeyword(purpose) {
-  if (purpose === "ちょっとした贈り物") return "プチギフト";
-  if (purpose === "季節イベント") return "季節 ギフト";
-  return purpose;
-}
-
-function moodKeyword(answers) {
-  if (answers.distance === "気を遣う関係" || hasAvoid(answers, heavyAvoidValue)) return "気軽";
-  if (answers.distance === "よく分からない") return "無難";
-  if (answers.recipient === "職場の人" || answers.vibe === "よく分からない") return "無難";
-  if (answers.vibe === "おしゃれなものが好き") return "おしゃれ";
-  if (answers.vibe === "実用的なものが好き") return "実用的";
-  if (answers.vibe === "癒し系が好き") return "癒し";
-  return "外さない";
-}
-
-function safetyKeyword(answers) {
-  const words = [];
-  if (hasAvoid(answers, "食べ物")) words.push("食品以外");
-  if (hasAvoid(answers, "香りもの")) words.push("香りなし");
-  if (hasAvoid(answers, "形に残るもの")) words.push("消えもの");
-  if (hasAvoid(answers, heavyAvoidValue)) words.push("重くない");
-  if (words.length > 0) return words.slice(0, 2).join(" ");
-  if (answers.distance === "気を遣う関係") return "重くない";
-  return "";
-}
-
-function categoryKeyword(category) {
-  if (!category) return "";
-  return category.replace("小さめの", "小さめ ").replace("ギフト", "ギフト").trim();
-}
-
-function buildKeywords(answers, genres, categories) {
-  return genres.map((genre, index) =>
-    [
-      budgetKeyword(answers.budget),
-      recipientKeyword(answers.recipient),
-      purposeKeyword(answers.purpose),
-      moodKeyword(answers),
-      index === 0 ? categoryKeyword(categories[0]) : "",
-      genre.keyword,
-      safetyKeyword(answers),
-    ]
-      .filter(Boolean)
-      .join(" ")
-  );
+function buildKeywords(answers, genres) {
+  return GiftSearchKeywords.buildSearchKeywords(answers, genres);
 }
 
 function renderConditions(answers) {
@@ -682,11 +625,11 @@ function renderKeywords(keywords) {
 }
 
 function renderShopLinks(keyword) {
-  const encodedKeyword = encodeURIComponent(keyword);
+  const urls = GiftSearchKeywords.buildShopUrls(keyword);
   const links = [
-    ["Amazonで探す", `https://www.amazon.co.jp/s?k=${encodedKeyword}`],
-    ["楽天で探す", `https://search.rakuten.co.jp/search/mall/${encodedKeyword}/`],
-    ["Yahooショッピングで探す", `https://shopping.yahoo.co.jp/search?p=${encodedKeyword}`],
+    ["Amazonで探す", urls.amazon],
+    ["楽天で探す", urls.rakuten],
+    ["Yahooショッピングで探す", urls.yahoo],
   ];
 
   shopLinks.innerHTML = "";
@@ -747,7 +690,8 @@ async function copySearchKeyword() {
       document.body.appendChild(textarea);
       textarea.select();
       try {
-        document.execCommand("copy");
+        const copied = document.execCommand("copy");
+        if (!copied) throw new Error("Copy command failed");
       } finally {
         textarea.remove();
       }
